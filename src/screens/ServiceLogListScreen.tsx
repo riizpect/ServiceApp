@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { COLORS, ROUTES, SERVICE_LOG_TYPES } from '../constants';
-import { RootStackParamList } from '../types';
+import { RootStackParamList, ServiceLogEntry, ServiceLogDisplay, Customer, ServiceCase } from '../types';
 import { serviceLogStorage, customerStorage, serviceCaseStorage } from '../services/storage';
 import { Chip, IconButton } from 'react-native-paper';
 import { Image as RNImage, Modal as RNModal } from 'react-native';
@@ -81,7 +81,7 @@ type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const ServiceLogListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<ServiceLogDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterCustomer, setFilterCustomer] = useState('Alla');
@@ -94,7 +94,7 @@ export const ServiceLogListScreen: React.FC = () => {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const [sort, setSort] = useState<'latest' | 'oldest'>('latest');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const [modalLog, setModalLog] = useState<any | null>(null);
+  const [modalLog, setModalLog] = useState<ServiceLogDisplay | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   // Add state for customer names
   const [customerNames, setCustomerNames] = useState<{ [id: string]: string }>({});
@@ -308,7 +308,7 @@ export const ServiceLogListScreen: React.FC = () => {
   }, [logs]);
 
   // Helper to get customer name for a log
-  const getCustomerName = (log: any) => {
+  const getCustomerName = (log: ServiceLogEntry) => {
     // First try to get customer name through service case
     if (log.serviceCaseId && serviceCaseNames[log.serviceCaseId]) {
       return serviceCaseNames[log.serviceCaseId];

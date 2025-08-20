@@ -95,6 +95,15 @@ export interface ServiceLogEntry {
   isImportant?: boolean; // Mark important entries
 }
 
+// Extended interface for display purposes in ServiceLogListScreen
+export interface ServiceLogDisplay extends ServiceLogEntry {
+  customer?: string;
+  date?: Date;
+  summary?: string;
+  technician?: string;
+  typeIcon?: string;
+}
+
 export interface ServiceImage {
   id: string;
   serviceCaseId: string;
