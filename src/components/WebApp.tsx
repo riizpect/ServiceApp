@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { WebLayout } from './WebLayout';
 import { WebDashboard } from './WebDashboard';
+import { WebCustomers } from './WebCustomers';
+import { WebNewCustomer } from './WebNewCustomer';
 import { ServiceCasesScreen } from '../screens/ServiceCasesScreen';
-import { CustomersScreen } from '../screens/CustomersScreen';
 import { ProductsScreen } from '../screens/ProductsScreen';
 import ContractsScreen from '../screens/ContractsScreen';
 import { RemindersScreen } from '../screens/RemindersScreen';
@@ -12,15 +13,23 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 
 export const WebApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [pageParams, setPageParams] = useState<any>({});
+
+  const handleNavigate = (page: string, params?: any) => {
+    setCurrentPage(page);
+    setPageParams(params || {});
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <WebDashboard onNavigate={setCurrentPage} />;
+        return <WebDashboard onNavigate={handleNavigate} />;
       case 'servicecases':
         return <ServiceCasesScreen />;
       case 'customers':
-        return <CustomersScreen />;
+        return <WebCustomers onNavigate={handleNavigate} />;
+      case 'newcustomer':
+        return <WebNewCustomer onNavigate={handleNavigate} />;
       case 'products':
         return <ProductsScreen />;
       case 'contracts':
@@ -32,14 +41,14 @@ export const WebApp: React.FC = () => {
       case 'settings':
         return <SettingsScreen />;
       default:
-        return <WebDashboard onNavigate={setCurrentPage} />;
+        return <WebDashboard onNavigate={handleNavigate} />;
     }
   };
 
   return (
     <WebLayout
       currentPage={currentPage}
-      onPageChange={setCurrentPage}
+      onPageChange={handleNavigate}
     >
       {renderPage()}
     </WebLayout>
