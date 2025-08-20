@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { ServiceCase } from '../types';
 import { STATUS_COLORS, PRIORITY_COLORS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
+import { RootStackNavigationProp } from '../types';
 
 interface ServiceCaseCardProps {
   serviceCase: ServiceCase;
@@ -23,7 +24,7 @@ interface ServiceCaseCardProps {
   onDelete?: (serviceCaseId: string) => void;
 }
 
-const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
+const ServiceCaseCard: React.FC<ServiceCaseCardProps> = React.memo(({
   serviceCase,
   customerName,
   onStatusChange,
@@ -31,46 +32,48 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<RootStackNavigationProp>();
   const { colors } = useTheme();
   const [showPriorityModal, setShowPriorityModal] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
 
-  const getStatusText = (status: ServiceCase['status']) => {
-    switch (status) {
+  // Memoize expensive calculations
+  const statusText = useMemo(() => {
+    switch (serviceCase.status) {
       case 'pending': return 'Väntar';
       case 'in_progress': return 'Pågår';
       case 'completed': return 'Avslutat';
       case 'cancelled': return 'Avbrutet';
       default: return 'Okänd';
     }
-  };
+  }, [serviceCase.status]);
 
-  const getPriorityText = (priority: ServiceCase['priority']) => {
-    switch (priority) {
+  const priorityText = useMemo(() => {
+    switch (serviceCase.priority) {
       case 'low': return 'Låg';
       case 'medium': return 'Medium';
       case 'high': return 'Hög';
       case 'urgent': return 'Akut';
       default: return 'Medium';
     }
-  };
+  }, [serviceCase.priority]);
 
-  const getPriorityColor = (priority: ServiceCase['priority']) => {
-    return PRIORITY_COLORS[priority] || PRIORITY_COLORS.medium;
-  };
+  const priorityColor = useMemo(() => {
+    return PRIORITY_COLORS[serviceCase.priority] || PRIORITY_COLORS.medium;
+  }, [serviceCase.priority]);
 
-  const handleCardPress = () => {
+  // Memoize callback functions
+  const handleCardPress = useCallback(() => {
     navigation.navigate('ServiceCaseDetail', { serviceCaseId: serviceCase.id });
-  };
+  }, [navigation, serviceCase.id]);
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     if (onEdit) {
       onEdit(serviceCase);
     }
-  };
+  }, [onEdit, serviceCase]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     Alert.alert(
       'Ta bort serviceärende',
       'Är du säker på att du vill ta bort detta serviceärende?',
@@ -83,20 +86,20 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
         },
       ]
     );
-  };
+  }, [onDelete, serviceCase.id]);
 
-  const handlePriorityButtonPress = () => {
+  const handlePriorityButtonPress = useCallback(() => {
     setShowPriorityModal(true);
-  };
+  }, []);
 
-  const handlePrioritySelection = (priority: ServiceCase['priority']) => {
+  const handlePrioritySelection = useCallback((priority: ServiceCase['priority']) => {
     if (onPriorityChange) {
       onPriorityChange(serviceCase.id, priority);
     }
     setShowPriorityModal(false);
     // Återställ kortet till ursprungspositionen efter val
     hidePriorityButton();
-  };
+  }, [onPriorityChange, serviceCase.id]);
 
   const handleModalClose = () => {
     setShowPriorityModal(false);
@@ -169,7 +172,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
       {/* Priority Button (always behind card) */}
       <View style={styles.priorityButtonContainer}>
         <TouchableOpacity
-          style={[styles.priorityButton, { backgroundColor: getPriorityColor(serviceCase.priority) }]}
+          style={[styles.priorityButton, { backgroundColor: priorityColor }]}
           onPress={handlePriorityButtonPress}
           activeOpacity={0.8}
         >
@@ -187,7 +190,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
             styles.card,
             dynamicStyles.card,
             { 
-              borderLeftColor: getPriorityColor(serviceCase.priority),
+              borderLeftColor: priorityColor,
               transform: [{ translateX }]
             }
           ]}
@@ -211,7 +214,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
               <View style={styles.badgeContainer}>
                 <View style={[styles.statusBadge, dynamicStyles.statusBadge]}>
                   <Text style={styles.statusText}>
-                    {getStatusText(serviceCase.status)}
+                    {statusText}
                   </Text>
                 </View>
               </View>
@@ -229,7 +232,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
                   {serviceCase.equipmentType} • {serviceCase.equipmentSerialNumber}
                 </Text>
                 <Text style={[styles.priorityText, dynamicStyles.description]}>
-                  Prioritet: {getPriorityText(serviceCase.priority)}
+                  Prioritet: {priorityText}
                 </Text>
               </View>
               
@@ -280,7 +283,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
                 ]}
                 onPress={() => handlePrioritySelection(option.value)}
               >
-                <View style={[styles.priorityIndicator, { backgroundColor: getPriorityColor(option.value) }]} />
+                <View style={[styles.priorityIndicator, { backgroundColor: PRIORITY_COLORS[option.value] || PRIORITY_COLORS.medium }]} />
                 <Text style={[styles.priorityOptionText, { color: colors.text }]}>
                   {option.label}
                 </Text>
@@ -302,7 +305,7 @@ const ServiceCaseCard: React.FC<ServiceCaseCardProps> = ({
       </Modal>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

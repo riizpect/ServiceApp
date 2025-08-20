@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import { customerStorage, serviceCaseStorage, reminderStorage } from '../service
 import { GlobalSearch } from '../components/GlobalSearch';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useTheme } from '../contexts/ThemeContext';
-
 import { RootStackNavigationProp } from '../types';
 
 interface DashboardStats {
@@ -51,7 +50,35 @@ export const DashboardScreen: React.FC = () => {
     overdueReminders: 0,
   });
 
-  const loadDashboardData = async () => {
+  // Memoize expensive calculations
+  const calculatedStats = useMemo(() => {
+    const activeCases = serviceCases.filter(case_ => 
+      case_.status === 'pending' || case_.status === 'in_progress'
+    );
+    const completedCases = serviceCases.filter(case_ => 
+      case_.status === 'completed'
+    );
+    const activeReminders = reminders.filter(reminder => !reminder.isCompleted);
+    const overdueReminders = reminders.filter(reminder => 
+      !reminder.isCompleted && new Date(reminder.dueDate) < new Date()
+    );
+
+    return {
+      totalServiceCases: serviceCases.length,
+      activeServiceCases: activeCases.length,
+      completedServiceCases: completedCases.length,
+      totalCustomers: customers.length,
+      activeReminders: activeReminders.length,
+      overdueReminders: overdueReminders.length,
+    };
+  }, [serviceCases, customers, reminders]);
+
+  // Update stats when calculated stats change
+  useEffect(() => {
+    setStats(calculatedStats);
+  }, [calculatedStats]);
+
+  const loadDashboardData = useCallback(async () => {
     try {
       console.log('Dashboard - Loading data...');
       const [customersData, serviceCasesData, remindersData] = await Promise.all([
@@ -66,47 +93,27 @@ export const DashboardScreen: React.FC = () => {
       setCustomers(customersData);
       setServiceCases(serviceCasesData);
       setReminders(remindersData);
-
-      // Beräkna statistik
-      const activeCases = serviceCasesData.filter(case_ => 
-        case_.status === 'pending' || case_.status === 'in_progress'
-      );
-      const completedCases = serviceCasesData.filter(case_ => 
-        case_.status === 'completed'
-      );
-      const activeReminders = remindersData.filter(reminder => !reminder.isCompleted);
-      const overdueReminders = remindersData.filter(reminder => 
-        !reminder.isCompleted && new Date(reminder.dueDate) < new Date()
-      );
-
-      setStats({
-        totalServiceCases: serviceCasesData.length,
-        activeServiceCases: activeCases.length,
-        completedServiceCases: completedCases.length,
-        totalCustomers: customersData.length,
-        activeReminders: activeReminders.length,
-        overdueReminders: overdueReminders.length,
-      });
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadDashboardData();
     setRefreshing(false);
-  };
+  }, [loadDashboardData]);
 
   useFocusEffect(
     useCallback(() => {
       loadDashboardData();
-    }, [])
+    }, [loadDashboardData])
   );
 
-  const getStatusText = (status: ServiceCase['status']) => {
+  // Memoize utility functions
+  const getStatusText = useCallback((status: ServiceCase['status']) => {
     switch (status) {
       case 'pending': return 'Väntar';
       case 'in_progress': return 'Pågår';
@@ -114,18 +121,18 @@ export const DashboardScreen: React.FC = () => {
       case 'cancelled': return 'Avbrutet';
       default: return 'Okänd';
     }
-  };
+  }, []);
 
-  const formatDate = (date: Date) => {
+  const formatDate = useCallback((date: Date) => {
     return new Date(date).toLocaleDateString('sv-SE');
-  };
+  }, []);
 
-  const getGreeting = () => {
+  const getGreeting = useCallback(() => {
     const hour = new Date().getHours();
     if (hour < 12) return 'God morgon';
     if (hour < 18) return 'God eftermiddag';
     return 'God kväll';
-  };
+  }, []);
 
   const renderWelcomeHeader = () => (
     <View style={styles.welcomeHeader}>
