@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, ViewStyle } from 'react-native';
 import { COLORS } from '../constants';
 
 interface LoadingSkeletonProps {
-  width?: number | string;
+  width?: number | `${number}%` | '100%';
   height?: number;
   borderRadius?: number;
-  style?: any;
+  style?: ViewStyle;
 }
 
-export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
+export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = React.memo(({
   width = '100%',
   height = 20,
   borderRadius = 8,
@@ -51,7 +51,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
       ]}
     />
   );
-};
+});
 
 interface CardSkeletonProps {
   showImage?: boolean;
@@ -60,7 +60,7 @@ interface CardSkeletonProps {
   showBadges?: boolean;
 }
 
-export const CardSkeleton: React.FC<CardSkeletonProps> = ({
+export const CardSkeleton: React.FC<CardSkeletonProps> = React.memo(({
   showImage = false,
   showTitle = true,
   showDescription = true,
@@ -81,7 +81,7 @@ export const CardSkeleton: React.FC<CardSkeletonProps> = ({
       </View>
     )}
   </View>
-);
+));
 
 const styles = StyleSheet.create({
   skeleton: {

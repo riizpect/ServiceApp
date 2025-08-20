@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ServiceCase, Customer, Product } from '../types';
 import { serviceCaseStorage, customerStorage, productStorage } from '../services/storage';
 import { COLORS } from '../constants';
+import { RootStackNavigationProp } from '../types';
 
 interface SearchResult {
   id: string;
@@ -24,10 +25,10 @@ interface SearchResult {
 interface GlobalSearchProps {
   visible: boolean;
   onClose: () => void;
-  navigation: any;
+  navigation: RootStackNavigationProp;
 }
 
-export const GlobalSearch: React.FC<GlobalSearchProps> = ({
+export const GlobalSearch: React.FC<GlobalSearchProps> = React.memo(({
   visible,
   onClose,
   navigation,
@@ -36,7 +37,8 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const performSearch = async (query: string) => {
+  // Memoize search function
+  const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setResults([]);
       return;
@@ -51,13 +53,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       ]);
 
       const searchResults: SearchResult[] = [];
+      const lowerQuery = query.toLowerCase();
 
       // Sök i serviceärenden
       serviceCases.forEach(case_ => {
         if (
-          case_.title.toLowerCase().includes(query.toLowerCase()) ||
-          case_.description.toLowerCase().includes(query.toLowerCase()) ||
-          case_.equipmentSerialNumber?.toLowerCase().includes(query.toLowerCase())
+          case_.title.toLowerCase().includes(lowerQuery) ||
+          case_.description.toLowerCase().includes(lowerQuery) ||
+          case_.equipmentSerialNumber?.toLowerCase().includes(lowerQuery)
         ) {
           searchResults.push({
             id: case_.id,
@@ -72,10 +75,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       // Sök i kunder
       customers.forEach(customer => {
         if (
-          customer.name.toLowerCase().includes(query.toLowerCase()) ||
-          customer.address.toLowerCase().includes(query.toLowerCase()) ||
+          customer.name.toLowerCase().includes(lowerQuery) ||
+          customer.address.toLowerCase().includes(lowerQuery) ||
           customer.phone.includes(query) ||
-          customer.email?.toLowerCase().includes(query.toLowerCase())
+          customer.email?.toLowerCase().includes(lowerQuery)
         ) {
           searchResults.push({
             id: customer.id,
@@ -90,9 +93,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       // Sök i produkter
       products.forEach(product => {
         if (
-          product.name.toLowerCase().includes(query.toLowerCase()) ||
-          product.serialNumber.toLowerCase().includes(query.toLowerCase()) ||
-          product.model?.toLowerCase().includes(query.toLowerCase())
+          product.name.toLowerCase().includes(lowerQuery) ||
+          product.serialNumber.toLowerCase().includes(lowerQuery) ||
+          product.model?.toLowerCase().includes(lowerQuery)
         ) {
           searchResults.push({
             id: product.id,
@@ -120,7 +123,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Add empty dependency array to prevent infinite loop
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -128,9 +131,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, performSearch]); // Add performSearch to dependencies
 
-  const handleResultPress = (result: SearchResult) => {
+  const handleResultPress = useCallback((result: SearchResult) => {
     onClose();
     setSearchQuery('');
     
@@ -145,25 +148,25 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         navigation.navigate('ProductDetail', { productId: result.id });
         break;
     }
-  };
+  }, [navigation, onClose]); // Add navigation and onClose to dependencies
 
-  const getResultIcon = (type: SearchResult['type']) => {
+  const getResultIcon = useCallback((type: SearchResult['type']) => {
     switch (type) {
       case 'serviceCase': return '🔧';
       case 'customer': return '👥';
       case 'product': return '📦';
     }
-  };
+  }, []); // Add empty dependency array
 
-  const getResultColor = (type: SearchResult['type']) => {
+  const getResultColor = useCallback((type: SearchResult['type']) => {
     switch (type) {
       case 'serviceCase': return COLORS.primary;
       case 'customer': return COLORS.secondary;
       case 'product': return COLORS.accent;
     }
-  };
+  }, []); // Add empty dependency array
 
-  const renderSearchResult = ({ item }: { item: SearchResult }) => (
+  const renderSearchResult = useCallback(({ item }: { item: SearchResult }) => (
     <TouchableOpacity onPress={() => handleResultPress(item)} activeOpacity={0.7}>
       <Card style={styles.resultCard}>
         <Card.Content style={styles.resultContent}>
@@ -188,7 +191,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
         </Card.Content>
       </Card>
     </TouchableOpacity>
-  );
+  ), [handleResultPress, getResultIcon, getResultColor]); // Add dependencies
 
   return (
     <Modal
@@ -246,7 +249,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       </SafeAreaView>
     </Modal>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
