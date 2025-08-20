@@ -2,133 +2,130 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '../constants';
-import { useAuth } from '../contexts/AuthContext';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { authService } from '../services/auth';
 
 export const LoginScreen: React.FC = () => {
-  const [email, setEmail] = useState('demo@ferno.se');
-  const [password, setPassword] = useState('password');
-  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation<any>();
   const { login } = useAuth();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { colors } = useTheme();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    console.log('Försöker logga in:', email);
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Fel', 'Vänligen fyll i både e-post och lösenord');
+    if (!email || !password) {
+      Alert.alert('Fel', 'Fyll i både e-post och lösenord');
       return;
     }
-    setIsLoading(true);
+
     try {
+      setIsLoading(true);
       await login(email, password);
-      Alert.alert('Inloggad', 'Du är nu inloggad!');
-      navigation.reset({ index: 0, routes: [{ name: 'Main', params: undefined }] });
-    } catch (error) {
-      console.log('Login error:', error);
-      Alert.alert('Inloggningsfel', 'Felaktig e-post eller lösenord');
+    } catch (error: any) {
+      Alert.alert('Inloggningsfel', error.message || 'Ett fel uppstod vid inloggning');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRegister = () => {
-    navigation.navigate({ name: 'Register', params: undefined });
+    navigation.navigate('Register');
+  };
+
+  // Test-funktion för lösenordshashning (endast för utveckling)
+  const testPasswordHashing = async () => {
+    try {
+      await authService.testPasswordHashing();
+      Alert.alert('Test Slutfört', 'Kolla konsolen för resultat');
+    } catch (error) {
+      Alert.alert('Test Fel', 'Ett fel uppstod vid testning');
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        style={styles.keyboardView}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Text style={styles.logoIcon}>🏥</Text>
-            </View>
-            <Text style={styles.title}>Ferno Norden Service</Text>
-            <Text style={styles.subtitle}>Logga in på ditt konto</Text>
-          </View>
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: colors.text }]}>ServiceApp</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Logga in för att komma åt dina serviceärenden
+          </Text>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>E-postadress</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Ange din e-postadress"
-                placeholderTextColor={COLORS.textTertiary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
+            <TextInput
+              style={[styles.input, { 
+                backgroundColor: colors.surface, 
+                color: colors.text,
+                borderColor: colors.border 
+              }]}
+              placeholder="E-post"
+              placeholderTextColor={colors.textSecondary}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Lösenord</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Ange ditt lösenord"
-                placeholderTextColor={COLORS.textTertiary}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
+            <TextInput
+              style={[styles.input, { 
+                backgroundColor: colors.surface, 
+                color: colors.text,
+                borderColor: colors.border 
+              }]}
+              placeholder="Lösenord"
+              placeholderTextColor={colors.textSecondary}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
 
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              style={[styles.loginButton, { backgroundColor: colors.primary }]}
               onPress={handleLogin}
               disabled={isLoading}
-              activeOpacity={0.9}
             >
-              {isLoading ? (
-                <ActivityIndicator color={COLORS.textInverse} size="small" />
-              ) : (
-                <Text style={styles.loginButtonText}>Logga in</Text>
-              )}
+              <Text style={styles.loginButtonText}>
+                {isLoading ? 'Loggar in...' : 'Logga in'}
+              </Text>
             </TouchableOpacity>
-
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>eller</Text>
-              <View style={styles.dividerLine} />
-            </View>
 
             <TouchableOpacity
               style={styles.registerButton}
               onPress={handleRegister}
-              activeOpacity={0.8}
             >
-              <Text style={styles.registerButtonText}>Skapa nytt konto</Text>
+              <Text style={[styles.registerButtonText, { color: colors.primary }]}>
+                Skapa nytt konto
+              </Text>
+            </TouchableOpacity>
+
+            {/* Test-knapp för utveckling */}
+            <TouchableOpacity
+              style={[styles.testButton, { backgroundColor: colors.secondary }]}
+              onPress={testPasswordHashing}
+            >
+              <Text style={styles.testButtonText}>
+                🧪 Testa Lösenordshashning
+              </Text>
             </TouchableOpacity>
           </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Genom att logga in godkänner du våra användarvillkor
-            </Text>
-          </View>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -137,141 +134,96 @@ export const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  keyboardView: {
+  keyboardAvoidingView: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
+  content: {
+    flex: 1,
     padding: 32,
     justifyContent: 'center',
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 60,
-  },
-  logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 32,
-    shadowColor: COLORS.shadowStrong,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 1,
-    shadowRadius: 32,
-    elevation: 12,
-  },
-  logoIcon: {
-    fontSize: 48,
   },
   title: {
     fontSize: 32,
     fontWeight: '900',
-    color: COLORS.text,
-    marginBottom: 12,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 18,
-    color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '400',
   },
   form: {
-    marginBottom: 40,
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 12,
+    marginTop: 40,
   },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: 'transparent', // This will be overridden by inline style
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
     fontSize: 16,
-    color: COLORS.text,
+    color: 'transparent', // This will be overridden by inline style
     borderWidth: 2,
-    borderColor: COLORS.borderLight,
-    shadowColor: COLORS.shadowMedium,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 3,
+    borderColor: 'transparent', // This will be overridden by inline style
+    shadowColor: 'transparent', // This will be overridden by inline style
+    shadowOffset: { width: 0, height: 0 }, // This will be overridden by inline style
+    shadowOpacity: 0, // This will be overridden by inline style
+    shadowRadius: 0, // This will be overridden by inline style
+    elevation: 0, // This will be overridden by inline style
   },
   loginButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: 'transparent', // This will be overridden by inline style
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     marginTop: 12,
-    shadowColor: COLORS.shadowStrong,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 6,
-  },
-  loginButtonDisabled: {
-    opacity: 0.7,
+    shadowColor: 'transparent', // This will be overridden by inline style
+    shadowOffset: { width: 0, height: 0 }, // This will be overridden by inline style
+    shadowOpacity: 0, // This will be overridden by inline style
+    shadowRadius: 0, // This will be overridden by inline style
+    elevation: 0, // This will be overridden by inline style
   },
   loginButtonText: {
     fontSize: 18,
     fontWeight: '800',
-    color: COLORS.textInverse,
+    color: 'transparent', // This will be overridden by inline style
     letterSpacing: 0.5,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 32,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: COLORS.borderLight,
-  },
-  dividerText: {
-    marginHorizontal: 20,
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-  },
   registerButton: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: 'transparent', // This will be overridden by inline style
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.borderLight,
-    shadowColor: COLORS.shadowMedium,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 3,
+    borderColor: 'transparent', // This will be overridden by inline style
+    shadowColor: 'transparent', // This will be overridden by inline style
+    shadowOffset: { width: 0, height: 0 }, // This will be overridden by inline style
+    shadowOpacity: 0, // This will be overridden by inline style
+    shadowRadius: 0, // This will be overridden by inline style
+    elevation: 0, // This will be overridden by inline style
   },
   registerButtonText: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.text,
+    color: 'transparent', // This will be overridden by inline style
   },
-  footer: {
+  testButton: {
+    backgroundColor: 'transparent', // This will be overridden by inline style
+    borderRadius: 16,
+    paddingVertical: 18,
     alignItems: 'center',
+    marginTop: 12,
+    shadowColor: 'transparent', // This will be overridden by inline style
+    shadowOffset: { width: 0, height: 0 }, // This will be overridden by inline style
+    shadowOpacity: 0, // This will be overridden by inline style
+    shadowRadius: 0, // This will be overridden by inline style
+    elevation: 0, // This will be overridden by inline style
   },
-  footerText: {
-    fontSize: 14,
-    color: COLORS.textTertiary,
-    textAlign: 'center',
-    lineHeight: 20,
+  testButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'transparent', // This will be overridden by inline style
   },
 }); 
