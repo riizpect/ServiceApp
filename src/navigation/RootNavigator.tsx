@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Platform } from 'react-native';
 import MainTabNavigator from './MainTabNavigator';
-import WebNavigator from './WebNavigator';
+import { WebApp } from '../components/WebApp';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { NewServiceCaseScreen } from '../screens/NewServiceCaseScreen';
@@ -52,7 +52,7 @@ export const RootNavigator: React.FC = () => {
   }
 
   // Välj rätt navigator beroende på plattform
-  const MainNavigator = isWeb ? WebNavigator : MainTabNavigator;
+  const MainNavigator = isWeb ? WebApp : MainTabNavigator;
 
   return (
     <Stack.Navigator

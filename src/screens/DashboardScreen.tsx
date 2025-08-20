@@ -450,7 +450,7 @@ export const DashboardScreen: React.FC = () => {
 
   if (isWeb) {
     return (
-      <ResponsiveLayout>
+      <View style={styles.webContainer}>
         {content}
         {searchVisible && (
           <GlobalSearch
@@ -459,7 +459,7 @@ export const DashboardScreen: React.FC = () => {
             navigation={navigation}
           />
         )}
-      </ResponsiveLayout>
+      </View>
     );
   }
 
@@ -480,6 +480,11 @@ export const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  webContainer: {
+    flex: 1,
+    maxWidth: 1200,
+    marginHorizontal: 'auto',
   },
   scrollView: {
     flex: 1,
