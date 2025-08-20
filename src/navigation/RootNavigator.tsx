@@ -1,6 +1,8 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Platform } from 'react-native';
 import MainTabNavigator from './MainTabNavigator';
+import WebNavigator from './WebNavigator';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { NewServiceCaseScreen } from '../screens/NewServiceCaseScreen';
@@ -43,10 +45,14 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export const RootNavigator: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const isWeb = Platform.OS === 'web';
 
   if (isLoading) {
     return <LoadingSkeleton />;
   }
+
+  // Välj rätt navigator beroende på plattform
+  const MainNavigator = isWeb ? WebNavigator : MainTabNavigator;
 
   return (
     <Stack.Navigator
@@ -57,7 +63,7 @@ export const RootNavigator: React.FC = () => {
     >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="Main" component={MainTabNavigator} />
+      <Stack.Screen name="Main" component={MainNavigator} />
       <Stack.Screen name="NewServiceCase" component={NewServiceCaseScreen} />
       <Stack.Screen name="EditServiceCase" component={EditServiceCaseScreen} />
       <Stack.Screen name="NewCustomer" component={NewCustomerScreen} />

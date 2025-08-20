@@ -2,6 +2,14 @@
 
 En React Native-app för servicetekniker på Ferno Norden AB för att hantera serviceärenden, kunder och påminnelser för VIPER-bårar och PowerTraxx-stolar.
 
+## 🌐 Multi-plattform stöd
+
+ServiceApp fungerar på:
+- **📱 iOS** - Native app via App Store
+- **🤖 Android** - Native app via Play Store  
+- **💻 Web** - Responsiv webbapp i webbläsaren
+- **📱 Expo Go** - Snabb testning på mobil
+
 ## 🚀 Funktioner
 
 - **Serviceärenden**: Skapa, hantera och spåra serviceärenden
@@ -10,8 +18,9 @@ En React Native-app för servicetekniker på Ferno Norden AB för att hantera se
 - **Bilder**: Ta bilder av skador, serienummer och service
 - **Signaturer**: Samla digitala signaturer
 - **Påminnelser**: Schemalägg framtida service
+- **Service-avtal**: Hantera servicekontrakt
 - **Offline-stöd**: Lokal lagring med AsyncStorage
-- **Rapporter**: Exportera data (kommer snart)
+- **Responsiv design**: Anpassar sig för mobil, tablet och desktop
 
 ## 🛠 Teknisk Stack
 
@@ -22,13 +31,16 @@ En React Native-app för servicetekniker på Ferno Norden AB för att hantera se
 - **React Native Paper** för UI-komponenter
 - **Expo Camera** för bildtagning
 - **Expo Notifications** för påminnelser
+- **React Native Web** för web-stöd
 
 ## 📱 Installation
 
+### För utveckling
+
 1. Klona projektet:
 ```bash
-git clone <repository-url>
-cd ServiceAppNew
+git clone https://github.com/riizpect/ServiceApp.git
+cd ServiceApp
 ```
 
 2. Installera dependencies:
@@ -41,32 +53,77 @@ npm install
 npm start
 ```
 
-4. Öppna appen i Expo Go eller kör på simulator/emulator
+### Plattform-specifika kommandon
+
+```bash
+# Starta alla plattformar
+npm start
+
+# Endast iOS
+npm run ios
+
+# Endast Android  
+npm run android
+
+# Endast Web
+npm run web
+
+# Expo Go
+npm start
+```
+
+## 🌐 Web-användning
+
+### Öppna i webbläsare
+1. Kör `npm run web`
+2. Öppna http://localhost:8081 i webbläsaren
+3. Appen anpassar sig automatiskt för skärmstorlek
+
+### Web-funktioner
+- **Responsiv design** - Anpassar sig för desktop, tablet och mobil
+- **Sidebar-navigation** - På större skärmar
+- **Tab-navigation** - På mindre skärmar
+- **Touch-optimized** - Fungerar med mus och touch
+- **Keyboard-stöd** - Fullständigt tangentbordsstöd
+
+## 📱 Mobil-användning
+
+### iOS/Android
+1. Installera Expo Go från App Store/Play Store
+2. Skanna QR-koden från `npm start`
+3. Appen öppnas i Expo Go
+
+### Native build
+```bash
+# iOS
+expo build:ios
+
+# Android
+expo build:android
+```
 
 ## 🏗 Projektstruktur
 
 ```
 src/
 ├── components/          # Återanvändbara komponenter
-│   └── ServiceCaseCard.tsx
-├── constants/           # App-konstanter och konfiguration
-│   └── index.ts
+│   ├── ResponsiveLayout.tsx    # Responsiv layout
+│   ├── ServiceCaseCard.tsx
+│   └── ...
 ├── navigation/          # Navigationslogik
-│   ├── MainTabNavigator.tsx
+│   ├── MainTabNavigator.tsx    # Mobil navigation
+│   ├── WebNavigator.tsx        # Web navigation
 │   └── RootNavigator.tsx
 ├── screens/             # App-skärmar
-│   ├── CustomersScreen.tsx
-│   ├── NewCustomerScreen.tsx
-│   ├── NewServiceCaseScreen.tsx
-│   ├── RemindersScreen.tsx
+│   ├── DashboardScreen.tsx
 │   ├── ServiceCasesScreen.tsx
-│   └── SettingsScreen.tsx
+│   └── ...
 ├── services/            # Datahantering och API
 │   └── storage.ts
 ├── types/               # TypeScript interfaces
 │   └── index.ts
 └── utils/               # Hjälpfunktioner
-    └── testData.ts
+    └── ...
 ```
 
 ## 📊 Datamodeller
@@ -83,6 +140,12 @@ src/
 - Checklista
 - Bilder och signaturer
 
+### ServiceContract (Service-avtal)
+- Kontraktsinformation
+- Kundkoppling
+- Status och förfallodatum
+- Tjänster och priser
+
 ### ServiceReminder (Påminnelse)
 - Schemalagd service
 - Prioritet
@@ -91,7 +154,7 @@ src/
 ## 🎯 Användning
 
 ### Första gången
-1. Öppna appen
+1. Öppna appen (mobil eller web)
 2. Gå till "Inställningar"
 3. Tryck på "Skapa Testdata" för att lägga till exempeldata
 4. Utforska appens funktioner
@@ -118,10 +181,16 @@ src/
 4. Lägg till skärmar i `src/screens/`
 5. Uppdatera navigation vid behov
 
-### Testdata
-Använd `createTestData()` funktionen i `src/utils/testData.ts` för att skapa exempeldata för utveckling och testning.
+### Responsiv design
+- Använd `ResponsiveLayout` för skärmar
+- Använd `ResponsiveGrid` för listor
+- Testa på olika skärmstorlekar
+- Använd `Platform.OS === 'web'` för web-specifik kod
 
-## 📱 Kommande Funktioner
+### Testdata
+Använd `createTestData()` funktionen i `src/services/storage.ts` för att skapa exempeldata för utveckling och testning.
+
+## 📱 Kommando funktioner
 
 - [ ] Detaljerad serviceärende-vy
 - [ ] Kamerafunktionalitet för bildtagning
@@ -130,6 +199,7 @@ Använd `createTestData()` funktionen i `src/utils/testData.ts` för att skapa e
 - [ ] Push-notifikationer
 - [ ] Datasynkronisering
 - [ ] Backup/restore
+- [ ] PWA-stöd för web
 
 ## 🤝 Bidrag
 
@@ -145,4 +215,14 @@ Detta projekt är utvecklat för Ferno Norden AB.
 
 ## 👨‍💻 Utvecklare
 
-ServiceApp är utvecklad för servicetekniker på Ferno Norden AB för att effektivisera servicearbetet med VIPER-bårar och PowerTraxx-stolar. 
+ServiceApp är utvecklad för servicetekniker på Ferno Norden AB för att effektivisera servicearbetet med VIPER-bårar och PowerTraxx-stolar.
+
+## 🌐 Live Demo
+
+Testa appen live på: [Länk kommer snart]
+
+---
+
+**Plattformar:** iOS, Android, Web  
+**Språk:** Svenska  
+**Företag:** Ferno Norden AB 

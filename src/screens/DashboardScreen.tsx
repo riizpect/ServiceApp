@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -15,6 +16,7 @@ import { GlobalSearch } from '../components/GlobalSearch';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useTheme } from '../contexts/ThemeContext';
 import { RootStackNavigationProp } from '../types';
+import { ResponsiveLayout, ResponsiveGrid } from '../components/ResponsiveLayout';
 
 interface DashboardStats {
   totalServiceCases: number;
@@ -423,27 +425,47 @@ export const DashboardScreen: React.FC = () => {
     emptySubtext: { color: colors.textTertiary },
   };
 
+  const isWeb = Platform.OS === 'web';
+  
+  const content = (
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      {renderWelcomeHeader()}
+      {renderStatsGrid()}
+      {renderQuickActions()}
+      {renderRecentActivity()}
+    </ScrollView>
+  );
+
+  if (isWeb) {
+    return (
+      <ResponsiveLayout>
+        {content}
+        {searchVisible && (
+          <GlobalSearch
+            visible={searchVisible}
+            onClose={() => setSearchVisible(false)}
+            navigation={navigation}
+          />
+        )}
+      </ResponsiveLayout>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, dynamicStyles.container]} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        {renderWelcomeHeader()}
-        {renderStatsGrid()}
-        {renderQuickActions()}
-        {renderRecentActivity()}
-      </ScrollView>
-
+      {content}
       {searchVisible && (
         <GlobalSearch
           visible={searchVisible}
