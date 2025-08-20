@@ -22,6 +22,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { RootStackParamList } from '../types';
 import { EditProductScreen } from '../screens/EditProductScreen';
+// Service Contract screens
+import ContractsScreen from '../screens/ContractsScreen';
+import CreateContractScreen from '../screens/CreateContractScreen';
+import ContractDetailsScreen from '../screens/ContractDetailsScreen';
+import EditContractScreen from '../screens/EditContractScreen';
 // Settings screens
 import { StatisticsScreen } from '../screens/StatisticsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
@@ -69,6 +74,11 @@ export const RootNavigator: React.FC = () => {
       <Stack.Screen name="Reminders" component={RemindersScreen} />
       <Stack.Screen name="NewReminder" component={NewReminderScreen} />
       <Stack.Screen name="EditProduct" component={EditProductScreen} />
+      {/* Service Contract screens */}
+      <Stack.Screen name="Contracts" component={ContractsScreen} />
+      <Stack.Screen name="CreateContract" component={CreateContractScreen} />
+      <Stack.Screen name="ContractDetails" component={ContractDetailsScreen} />
+      <Stack.Screen name="EditContract" component={EditContractScreen} />
       {/* Settings screens */}
       <Stack.Screen name="Statistics" component={StatisticsScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />

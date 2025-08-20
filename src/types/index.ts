@@ -104,6 +104,54 @@ export interface ServiceLogDisplay extends ServiceLogEntry {
   typeIcon?: string;
 }
 
+// Service Contract Types
+export interface ServiceContract {
+  id: string;
+  customerId: string;
+  contractNumber: string;
+  title: string;
+  description?: string;
+  contractType: ContractType;
+  status: ContractStatus;
+  startDate: Date;
+  endDate: Date;
+  autoRenewal: boolean;
+  renewalPeriod?: number; // in months
+  totalValue: number;
+  monthlyValue?: number;
+  services: ContractService[];
+  terms: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type ContractType = 'basic' | 'premium' | 'enterprise' | 'custom';
+export type ContractStatus = 'active' | 'paused' | 'expired' | 'cancelled' | 'pending';
+
+export interface ContractService {
+  id: string;
+  name: string;
+  description?: string;
+  frequency: ServiceFrequency;
+  included: boolean;
+  price?: number;
+  notes?: string;
+}
+
+export type ServiceFrequency = 'monthly' | 'quarterly' | 'biannual' | 'annual' | 'on-demand';
+
+export interface ContractSchedule {
+  id: string;
+  contractId: string;
+  serviceId: string;
+  scheduledDate: Date;
+  completedDate?: Date;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'overdue';
+  technicianId?: string;
+  notes?: string;
+}
+
 export interface ServiceImage {
   id: string;
   serviceCaseId: string;
@@ -168,6 +216,11 @@ export type RootStackParamList = {
   Signature: { serviceCaseId: string };
   Settings: undefined;
   NewReminder: undefined;
+  // Service Contracts
+  Contracts: undefined;
+  CreateContract: undefined;
+  EditContract: { contractId: string };
+  ContractDetails: { contractId: string };
   // Settings sub-screens
   Statistics: undefined;
   Notifications: undefined;
@@ -188,6 +241,7 @@ export type MainTabParamList = {
   Reminders: undefined;
   Customers: undefined;
   Products: undefined;
+  Contracts: undefined;
   Settings: undefined;
 };
 

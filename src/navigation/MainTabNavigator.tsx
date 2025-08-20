@@ -11,6 +11,7 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { ServiceLogListScreen } from '../screens/ServiceLogListScreen';
 import { RemindersScreen } from '../screens/RemindersScreen';
 import { ProductsScreen } from '../screens/ProductsScreen';
+import ContractsScreen from '../screens/ContractsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,13 +26,18 @@ const MoreModal = ({ visible, onClose }: {
     { name: 'ServiceLogList', label: 'Serviceloggar', icon: '📝', screen: ServiceLogListScreen },
     { name: 'Reminders', label: 'Påminnelser', icon: '⏰', screen: RemindersScreen },
     { name: 'Products', label: 'Produkter', icon: '📦', screen: ProductsScreen },
+    { name: 'Contracts', label: 'Service-avtal', icon: '📋', screen: null },
   ];
 
   const handleOptionPress = (option: any) => {
     console.log('Navigating to:', option.name);
     onClose();
     try {
-      navigation.navigate(option.name as never);
+      if (option.name === 'Contracts') {
+        navigation.navigate('Contracts' as never);
+      } else {
+        navigation.navigate(option.name as never);
+      }
     } catch (error) {
       console.error('Navigation error:', error);
     }
