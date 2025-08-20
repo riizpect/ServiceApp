@@ -13,17 +13,35 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Denna app behöver tillgång till kameran för att ta bilder av serviceärenden och dokumentera arbetet.",
+        "NSPhotoLibraryUsageDescription": "Denna app behöver tillgång till ditt fotobibliotek för att välja bilder för serviceärenden."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Denna app behöver tillgång till ditt fotobibliotek för att välja bilder för serviceärenden.",
+          "cameraPermission": "Denna app behöver tillgång till kameran för att ta bilder av serviceärenden och dokumentera arbetet."
+        }
+      ]
+    ]
   }
 }
