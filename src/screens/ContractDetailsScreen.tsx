@@ -12,8 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { ServiceContract, ContractStatus, RootStackNavigationProp, RootStackRouteProp } from '../types';
 import { contractStorage } from '../services/contractStorage';
-import { customerStorage } from '../services/customerStorage';
-import LoadingSkeleton from '../components/LoadingSkeleton';
+import { customerStorage } from '../services/storage';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { ErrorHandler } from '../utils/errorHandler';
 
 const ContractDetailsScreen: React.FC = () => {
@@ -32,11 +32,11 @@ const ContractDetailsScreen: React.FC = () => {
         setContract(contractData);
         
         // Load customer name
-        const customer = await customerStorage.getCustomerById(contractData.customerId);
+        const customer = await customerStorage.getById(contractData.customerId);
         setCustomerName(customer?.name || 'Okänd kund');
       }
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid laddning av avtalsdetaljer');
+      ErrorHandler.handle(error, 'Fel vid laddning av avtalsdetaljer');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ const ContractDetailsScreen: React.FC = () => {
               await contractStorage.deleteContract(contract.id);
               navigation.goBack();
             } catch (error) {
-              ErrorHandler.handleError(error, 'Fel vid borttagning av avtal');
+              ErrorHandler.handle(error, 'Fel vid borttagning av avtal');
             }
           },
         },
@@ -163,20 +163,20 @@ const ContractDetailsScreen: React.FC = () => {
             style={[styles.actionButton, { backgroundColor: colors.primary }]}
             onPress={handleEdit}
           >
-            <Ionicons name="pencil" size={20} color={colors.white} />
+            <Ionicons name="pencil" size={20} color={colors.textInverse} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: colors.error }]}
             onPress={handleDelete}
           >
-            <Ionicons name="trash" size={20} color={colors.white} />
+            <Ionicons name="trash" size={20} color={colors.textInverse} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView style={styles.content}>
         {/* Contract Header */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <View style={styles.contractHeader}>
             <Text style={[styles.contractTitle, { color: colors.text }]}>
               {contract.title}
@@ -198,7 +198,7 @@ const ContractDetailsScreen: React.FC = () => {
         </View>
 
         {/* Customer Info */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Kund</Text>
           <Text style={[styles.customerName, { color: colors.text }]}>
             {customerName}
@@ -206,7 +206,7 @@ const ContractDetailsScreen: React.FC = () => {
         </View>
 
         {/* Contract Details */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Avtalsdetaljer</Text>
           
           <View style={styles.detailRow}>
@@ -248,7 +248,7 @@ const ContractDetailsScreen: React.FC = () => {
         </View>
 
         {/* Financial */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Ekonomi</Text>
           
           <View style={styles.detailRow}>
@@ -269,7 +269,7 @@ const ContractDetailsScreen: React.FC = () => {
         </View>
 
         {/* Services */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Tjänster</Text>
           
           {contract.services.length === 0 ? (
@@ -302,7 +302,7 @@ const ContractDetailsScreen: React.FC = () => {
                   <Text style={[styles.serviceFrequency, { color: colors.textSecondary }]}>
                     {getFrequencyText(service.frequency)}
                   </Text>
-                  {service.price > 0 && (
+                  {service.price && service.price > 0 && (
                     <Text style={[styles.servicePrice, { color: colors.primary }]}>
                       {formatCurrency(service.price)}
                     </Text>
@@ -321,7 +321,7 @@ const ContractDetailsScreen: React.FC = () => {
 
         {/* Terms */}
         {contract.terms && (
-          <View style={[styles.section, { backgroundColor: colors.card }]}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Villkor</Text>
             <Text style={[styles.terms, { color: colors.text }]}>
               {contract.terms}
@@ -331,7 +331,7 @@ const ContractDetailsScreen: React.FC = () => {
 
         {/* Notes */}
         {contract.notes && (
-          <View style={[styles.section, { backgroundColor: colors.card }]}>
+          <View style={[styles.section, { backgroundColor: colors.surface }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Anteckningar</Text>
             <Text style={[styles.notes, { color: colors.text }]}>
               {contract.notes}
@@ -340,7 +340,7 @@ const ContractDetailsScreen: React.FC = () => {
         )}
 
         {/* Metadata */}
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.surface }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Metadata</Text>
           
           <View style={styles.detailRow}>

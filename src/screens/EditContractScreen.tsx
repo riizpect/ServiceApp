@@ -15,8 +15,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
 import { ServiceContract, ContractType, ContractStatus, ContractService, ServiceFrequency, RootStackNavigationProp, RootStackRouteProp } from '../types';
 import { contractStorage } from '../services/contractStorage';
-import { customerStorage } from '../services/customerStorage';
-import SearchableDropdown from '../components/SearchableDropdown';
+import { customerStorage } from '../services/storage';
+import { SearchableDropdown } from '../components/SearchableDropdown';
 import { Validation } from '../utils/validation';
 import { ErrorHandler } from '../utils/errorHandler';
 
@@ -60,10 +60,10 @@ const EditContractScreen: React.FC = () => {
 
   const loadCustomers = useCallback(async () => {
     try {
-      const allCustomers = await customerStorage.getAllCustomers();
+      const allCustomers = await customerStorage.getAll();
       setCustomers(allCustomers.map(c => ({ id: c.id, name: c.name })));
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid laddning av kunder');
+      ErrorHandler.handle(error, 'Fel vid laddning av kunder');
     }
   }, []);
 
@@ -88,7 +88,7 @@ const EditContractScreen: React.FC = () => {
         setServices(contract.services);
       }
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid laddning av avtal');
+      ErrorHandler.handle(error, 'Fel vid laddning av avtal');
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ const EditContractScreen: React.FC = () => {
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid uppdatering av avtal');
+      ErrorHandler.handle(error, 'Fel vid uppdatering av avtal');
     } finally {
       setSaving(false);
     }
@@ -237,7 +237,7 @@ const EditContractScreen: React.FC = () => {
           onPress={handleSaveContract}
           disabled={saving}
         >
-          <Text style={[styles.saveButtonText, { color: colors.white }]}>
+          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>
             {saving ? 'Sparar...' : 'Spara'}
           </Text>
         </TouchableOpacity>

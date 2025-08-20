@@ -13,8 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { ServiceContract, ContractStatus, RootStackNavigationProp } from '../types';
 import { contractStorage } from '../services/contractStorage';
-import { customerStorage } from '../services/customerStorage';
-import LoadingSkeleton from '../components/LoadingSkeleton';
+import { customerStorage } from '../services/storage';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { ErrorHandler } from '../utils/errorHandler';
 
 interface ContractWithCustomer extends ServiceContract {
@@ -33,7 +33,7 @@ const ContractsScreen: React.FC = () => {
     try {
       setLoading(true);
       const allContracts = await contractStorage.getAllContracts();
-      const customers = await customerStorage.getAllCustomers();
+      const customers = await customerStorage.getAll();
       
       const contractsWithCustomers = allContracts.map(contract => {
         const customer = customers.find(c => c.id === contract.customerId);
@@ -45,7 +45,7 @@ const ContractsScreen: React.FC = () => {
       
       setContracts(contractsWithCustomers);
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid laddning av avtal');
+      ErrorHandler.handle(error, 'Fel vid laddning av avtal');
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ const ContractsScreen: React.FC = () => {
               await contractStorage.deleteContract(contract.id);
               await loadContracts();
             } catch (error) {
-              ErrorHandler.handleError(error, 'Fel vid borttagning av avtal');
+              ErrorHandler.handle(error, 'Fel vid borttagning av avtal');
             }
           },
         },
@@ -137,7 +137,7 @@ const ContractsScreen: React.FC = () => {
 
   const renderContractItem = useCallback(({ item }: { item: ContractWithCustomer }) => (
     <TouchableOpacity
-      style={[styles.contractCard, { backgroundColor: colors.card }]}
+      style={[styles.contractCard, { backgroundColor: colors.surface }]}
       onPress={() => handleContractPress(item)}
     >
       <View style={styles.contractHeader}>
@@ -173,16 +173,16 @@ const ContractsScreen: React.FC = () => {
           style={[styles.actionButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('EditContract', { contractId: item.id })}
         >
-          <Ionicons name="pencil" size={16} color={colors.white} />
-          <Text style={[styles.actionText, { color: colors.white }]}>Redigera</Text>
+          <Ionicons name="pencil" size={16} color={colors.textInverse} />
+          <Text style={[styles.actionText, { color: colors.textInverse }]}>Redigera</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: colors.error }]}
           onPress={() => handleDeleteContract(item)}
         >
-          <Ionicons name="trash" size={16} color={colors.white} />
-          <Text style={[styles.actionText, { color: colors.white }]}>Ta bort</Text>
+          <Ionicons name="trash" size={16} color={colors.textInverse} />
+          <Text style={[styles.actionText, { color: colors.textInverse }]}>Ta bort</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -204,7 +204,7 @@ const ContractsScreen: React.FC = () => {
           style={[styles.addButton, { backgroundColor: colors.primary }]}
           onPress={handleCreateContract}
         >
-          <Ionicons name="add" size={24} color={colors.white} />
+          <Ionicons name="add" size={24} color={colors.textInverse} />
         </TouchableOpacity>
       </View>
 
@@ -226,7 +226,7 @@ const ContractsScreen: React.FC = () => {
               style={[styles.createButton, { backgroundColor: colors.primary }]}
               onPress={handleCreateContract}
             >
-              <Text style={[styles.createButtonText, { color: colors.white }]}>
+              <Text style={[styles.createButtonText, { color: colors.textInverse }]}>
                 Skapa första avtalet
               </Text>
             </TouchableOpacity>

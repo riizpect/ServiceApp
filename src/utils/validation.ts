@@ -140,4 +140,9 @@ export class Validation {
   static sanitizeEmail(email: string): string {
     return email.trim().toLowerCase();
   }
+  
+  static isValidAmount(amount: string): boolean {
+    const num = parseFloat(amount);
+    return !isNaN(num) && num > 0;
+  }
 } 

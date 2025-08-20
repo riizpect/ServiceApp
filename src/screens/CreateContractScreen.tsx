@@ -15,8 +15,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../contexts/ThemeContext';
 import { ServiceContract, ContractType, ContractStatus, ContractService, ServiceFrequency, RootStackNavigationProp } from '../types';
 import { contractStorage } from '../services/contractStorage';
-import { customerStorage } from '../services/customerStorage';
-import SearchableDropdown from '../components/SearchableDropdown';
+import { customerStorage } from '../services/storage';
+import { SearchableDropdown } from '../components/SearchableDropdown';
 import { Validation } from '../utils/validation';
 import { ErrorHandler } from '../utils/errorHandler';
 
@@ -57,10 +57,10 @@ const CreateContractScreen: React.FC = () => {
 
   const loadCustomers = useCallback(async () => {
     try {
-      const allCustomers = await customerStorage.getAllCustomers();
+      const allCustomers = await customerStorage.getAll();
       setCustomers(allCustomers.map(c => ({ id: c.id, name: c.name })));
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid laddning av kunder');
+      ErrorHandler.handle(error, 'Fel vid laddning av kunder');
     }
   }, []);
 
@@ -147,7 +147,7 @@ const CreateContractScreen: React.FC = () => {
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      ErrorHandler.handleError(error, 'Fel vid skapande av avtal');
+      ErrorHandler.handle(error, 'Fel vid skapande av avtal');
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ const CreateContractScreen: React.FC = () => {
           onPress={handleSaveContract}
           disabled={loading}
         >
-          <Text style={[styles.saveButtonText, { color: colors.white }]}>
+          <Text style={[styles.saveButtonText, { color: colors.textInverse }]}>
             {loading ? 'Sparar...' : 'Spara'}
           </Text>
         </TouchableOpacity>
@@ -199,8 +199,9 @@ const CreateContractScreen: React.FC = () => {
             value={customerId}
             onValueChange={setCustomerId}
             placeholder="Välj kund"
-            labelKey="name"
-            valueKey="id"
+            label="Kund"
+            getLabel={(item) => item.name}
+            getValue={(item) => item.id}
           />
         </View>
 
@@ -209,7 +210,7 @@ const CreateContractScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Avtalsdetaljer</Text>
           
           <TextInput
-            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Avtalstitel"
             placeholderTextColor={colors.textSecondary}
             value={title}
@@ -217,7 +218,7 @@ const CreateContractScreen: React.FC = () => {
           />
           
           <TextInput
-            style={[styles.textArea, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.textArea, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Beskrivning (valfritt)"
             placeholderTextColor={colors.textSecondary}
             value={description}
@@ -231,8 +232,9 @@ const CreateContractScreen: React.FC = () => {
             value={contractType}
             onValueChange={(value) => setContractType(value as ContractType)}
             placeholder="Välj avtalstyp"
-            labelKey="label"
-            valueKey="value"
+            label="Avtalstyp"
+            getLabel={(item) => item.label}
+            getValue={(item) => item.value}
           />
         </View>
 
@@ -241,7 +243,7 @@ const CreateContractScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Tidsperiod</Text>
           
           <TouchableOpacity
-            style={[styles.dateButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.dateButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => setShowStartDatePicker(true)}
           >
             <Text style={[styles.dateButtonText, { color: colors.text }]}>
@@ -251,7 +253,7 @@ const CreateContractScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.dateButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.dateButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => setShowEndDatePicker(true)}
           >
             <Text style={[styles.dateButtonText, { color: colors.text }]}>
@@ -271,7 +273,7 @@ const CreateContractScreen: React.FC = () => {
 
           {autoRenewal && (
             <TextInput
-              style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+              style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
               placeholder="Förnyelseperiod (månader)"
               placeholderTextColor={colors.textSecondary}
               value={renewalPeriod.toString()}
@@ -286,7 +288,7 @@ const CreateContractScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Ekonomi</Text>
           
           <TextInput
-            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Totalvärde (SEK)"
             placeholderTextColor={colors.textSecondary}
             value={totalValue}
@@ -295,7 +297,7 @@ const CreateContractScreen: React.FC = () => {
           />
           
           <TextInput
-            style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Månadsvärde (SEK, valfritt)"
             placeholderTextColor={colors.textSecondary}
             value={monthlyValue}
@@ -312,18 +314,18 @@ const CreateContractScreen: React.FC = () => {
               style={[styles.addServiceButton, { backgroundColor: colors.primary }]}
               onPress={() => setShowServiceForm(true)}
             >
-              <Ionicons name="add" size={20} color={colors.white} />
+              <Ionicons name="add" size={20} color={colors.textInverse} />
             </TouchableOpacity>
           </View>
 
           {services.map((service) => (
-            <View key={service.id} style={[styles.serviceItem, { backgroundColor: colors.card }]}>
+            <View key={service.id} style={[styles.serviceItem, { backgroundColor: colors.surface }]}>
               <View style={styles.serviceInfo}>
                 <Text style={[styles.serviceName, { color: colors.text }]}>{service.name}</Text>
                 <Text style={[styles.serviceFrequency, { color: colors.textSecondary }]}>
                   {frequencyOptions.find(f => f.value === service.frequency)?.label}
                 </Text>
-                {service.price > 0 && (
+                {service.price && service.price > 0 && (
                   <Text style={[styles.servicePrice, { color: colors.primary }]}>
                     {service.price} SEK
                   </Text>
@@ -333,13 +335,13 @@ const CreateContractScreen: React.FC = () => {
                 onPress={() => handleRemoveService(service.id)}
                 style={[styles.removeServiceButton, { backgroundColor: colors.error }]}
               >
-                <Ionicons name="trash" size={16} color={colors.white} />
+                <Ionicons name="trash" size={16} color={colors.textInverse} />
               </TouchableOpacity>
             </View>
           ))}
 
           {showServiceForm && (
-            <View style={[styles.serviceForm, { backgroundColor: colors.card }]}>
+            <View style={[styles.serviceForm, { backgroundColor: colors.surface }]}>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
                 placeholder="Service-namn"
@@ -360,11 +362,12 @@ const CreateContractScreen: React.FC = () => {
 
               <SearchableDropdown
                 data={frequencyOptions}
-                value={newService.frequency}
+                value={newService.frequency || ''}
                 onValueChange={(value) => setNewService({ ...newService, frequency: value as ServiceFrequency })}
                 placeholder="Frekvens"
-                labelKey="label"
-                valueKey="value"
+                label="Frekvens"
+                getLabel={(item) => item.label}
+                getValue={(item) => item.value}
               />
 
               <View style={styles.switchContainer}>
@@ -392,7 +395,7 @@ const CreateContractScreen: React.FC = () => {
                   style={[styles.serviceFormButton, { backgroundColor: colors.primary }]}
                   onPress={handleAddService}
                 >
-                  <Text style={[styles.serviceFormButtonText, { color: colors.white }]}>Lägg till</Text>
+                  <Text style={[styles.serviceFormButtonText, { color: colors.textInverse }]}>Lägg till</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.serviceFormButton, { backgroundColor: colors.border }]}
@@ -410,7 +413,7 @@ const CreateContractScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Villkor & Anteckningar</Text>
           
           <TextInput
-            style={[styles.textArea, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.textArea, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Avtalsvillkor"
             placeholderTextColor={colors.textSecondary}
             value={terms}
@@ -420,7 +423,7 @@ const CreateContractScreen: React.FC = () => {
           />
           
           <TextInput
-            style={[styles.textArea, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
+            style={[styles.textArea, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
             placeholder="Anteckningar (valfritt)"
             placeholderTextColor={colors.textSecondary}
             value={notes}
