@@ -9,13 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { Customer, ServiceCase } from '../types';
+import { Customer, ServiceCase, ServiceReminder } from '../types';
 import { customerStorage, serviceCaseStorage, reminderStorage } from '../services/storage';
 import { GlobalSearch } from '../components/GlobalSearch';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useTheme } from '../contexts/ThemeContext';
 
-type NavigationProp = any;
+import { RootStackNavigationProp } from '../types';
 
 interface DashboardStats {
   totalServiceCases: number;
@@ -34,13 +34,13 @@ const STATUS_COLORS = {
 };
 
 export const DashboardScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<RootStackNavigationProp>();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [serviceCases, setServiceCases] = useState<ServiceCase[]>([]);
-  const [reminders, setReminders] = useState<any[]>([]);
+  const [reminders, setReminders] = useState<ServiceReminder[]>([]);
   const [searchVisible, setSearchVisible] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalServiceCases: 0,
@@ -207,7 +207,7 @@ export const DashboardScreen: React.FC = () => {
             dynamicStyles.statCard,
             dynamicStyles.statCardWarning
           ]}
-          onPress={() => navigation.navigate('Reminders')}
+          onPress={() => navigation.navigate('Main', { screen: 'Reminders' })}
           activeOpacity={0.9}
         >
           <View style={styles.statContent}>

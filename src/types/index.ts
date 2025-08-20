@@ -133,7 +133,7 @@ export type RootStackParamList = {
   Register: undefined;
   Main: { 
     screen?: keyof MainTabParamList; 
-    params?: any;
+    params?: Record<string, unknown>;
   };
   Dashboard: undefined;
   Products: undefined;
@@ -180,4 +180,20 @@ export type MainTabParamList = {
   Customers: undefined;
   Products: undefined;
   Settings: undefined;
+};
+
+// Navigation prop types
+export type RootStackNavigationProp = import('@react-navigation/stack').StackNavigationProp<RootStackParamList>;
+export type MainTabNavigationProp = import('@react-navigation/bottom-tabs').BottomTabNavigationProp<MainTabParamList>;
+
+// Route prop types
+export type RootStackRouteProp<T extends keyof RootStackParamList> = {
+  key: string;
+  name: T;
+  params: RootStackParamList[T];
+};
+export type MainTabRouteProp<T extends keyof MainTabParamList> = {
+  key: string;
+  name: T;
+  params: MainTabParamList[T];
 }; 
