@@ -14,9 +14,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { authService } from '../services/auth';
+import { RootStackNavigationProp } from '../types';
 
 export const LoginScreen: React.FC = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<RootStackNavigationProp>();
   const { login } = useAuth();
   const { colors } = useTheme();
   const [email, setEmail] = useState('');
@@ -32,8 +33,9 @@ export const LoginScreen: React.FC = () => {
     try {
       setIsLoading(true);
       await login(email, password);
-    } catch (error: any) {
-      Alert.alert('Inloggningsfel', error.message || 'Ett fel uppstod vid inloggning');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Ett fel uppstod vid inloggning';
+      Alert.alert('Inloggningsfel', errorMessage);
     } finally {
       setIsLoading(false);
     }

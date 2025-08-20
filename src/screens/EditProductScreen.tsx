@@ -24,10 +24,11 @@ import { productStorage, productCategoryStorage } from '../services/storage';
 import { COLORS, EQUIPMENT_TYPES, PRODUCT_CATEGORIES, PRODUCT_CATEGORY_ICONS, PRODUCT_CATEGORY_COLORS } from '../constants';
 import { SearchableDropdown } from '../components/SearchableDropdown';
 import { useTheme } from '../contexts/ThemeContext';
+import { RootStackNavigationProp, RootStackRouteProp } from '../types';
 
 interface EditProductScreenProps {
-  navigation: any;
-  route: any;
+  navigation: RootStackNavigationProp;
+  route: RootStackRouteProp<'EditProduct'>;
 }
 
 export const EditProductScreen: React.FC<EditProductScreenProps> = ({ navigation, route }) => {

@@ -27,10 +27,11 @@ import { COLORS, SERVICE_LOG_TYPES, SERVICE_LOG_ICONS, SERVICE_LOG_COLORS } from
 import { SearchableDropdown } from '../components/SearchableDropdown';
 import { ImagePickerComponent } from '../components/ImagePicker';
 import { useTheme } from '../contexts/ThemeContext';
+import { RootStackNavigationProp, RootStackRouteProp } from '../types';
 
 interface EditServiceLogEntryScreenProps {
-  navigation: any;
-  route: any;
+  navigation: RootStackNavigationProp;
+  route: RootStackRouteProp<'EditServiceLogEntry'>;
 }
 
 export const EditServiceLogEntryScreen: React.FC<EditServiceLogEntryScreenProps> = ({ navigation, route }) => {
